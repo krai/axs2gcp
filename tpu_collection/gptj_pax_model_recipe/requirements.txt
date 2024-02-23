@@ -1,0 +1,6 @@
+jax[cpu]
+paxml
+praxis
+transformers
+accelerate
+jaxlib==0.4.14

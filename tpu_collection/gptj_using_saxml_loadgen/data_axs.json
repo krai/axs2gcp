@@ -1,0 +1,98 @@
+{
+    "_parent_entries": [ [ "^", "byname", "python_script" ], [ "^", "byname", "base_loadgen_program" ] ],
+    "_producer_rules": [
+        [ [ "loadgen_output", "task=gptj", "framework=saxml" ], [["get", "pipeline"]] ]
+    ],
+
+    "path_to_tpu_dir": [ "^^", "get_path", "tpu_code" ],
+
+    "abs_script_path": [ "^^", "substitute", "#{path_to_tpu_dir}#/main.py" ],
+
+    "path_to_saxml": [ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", "lib,lib_name=sax_so" ],
+        [ "get_path_of", "sax_so" ]
+    ]] ],
+
+    "python_deps": [
+        [ "^^", "get", "path_to_saxml" ],
+        [ "^^", "python_sync_pip_package", "python_package,package_name=mlperf_loadgen" ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=torch" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=absl-py" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=numpy" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=google-api-python-client" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=tensorflow", "package_version=2.13.1" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=transformers" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=datasets" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=nltk" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=evaluate" ]] ],
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=rouge_score" ]] ]
+    ],
+
+    "loadgen_scenario": "Offline",
+
+    "scenario_mlperf_to_internal_model_name": {
+        "Offline_gptj-99": "gptj4tokenizedint8bs32xlawait40mb6offline",
+        "Server_gptj-99": "gptj4tokenizedint8bs32xlawait40mb6server"
+    },
+    "model_name": [ "^^", "execute", [[
+        [ "get", "scenario_mlperf_to_internal_model_name" ],
+        [ "get", [ "^^", "substitute", "#{loadgen_scenario}#_#{mlperf_model_name}#"] ]
+    ]] ],
+    "model_path": [ "^^", "substitute", "/sax/test/#{model_name}#" ],
+
+    "task": "gptj",
+    "framework": "saxml",
+    "log_interval": 5,
+    "accuracy_log_dtype": "int64",
+    "tokenizer_path": "EleutherAI/gpt-j-6B",
+
+    "internal_to_mlperf_model_name": {
+        "gptj4tokenizedint8bs32xlawait40mb6offline": "gptj-99",
+        "gptj4tokenizedint8bs32xlawait40mb6server": "gptj-99"
+    },
+
+    "input_data_types": "int64",
+    "retraining": "no",
+    "url": "https://cloud.mlcommons.org/index.php/s/QAZ2oM94MkFtbQx/download",
+    "weight_data_types": "int8",
+    "weight_transformations": "int8 quantization of linear layers",
+
+    "output_entry_parents": [ "AS^IS", "AS^IS", [ "^", "byname", "base_gptj_loadgen_experiment" ] ],
+    "output_entry_param_names": [
+        "loadgen_multistreamness",
+
+        "log_interval",
+
+        "accuracy_log_dtype",
+        "tokenizer_path",
+
+        "input_data_types",
+        "retraining",
+        "url",
+        "weight_data_types",
+        "weight_transformations"
+    ],
+
+    "accuracy_flag": [ "^^", "case",[ ["^^", "get", "loadgen_mode"], "AccuracyOnly", "--accuracy" ], {"default_value": ""} ],
+
+    "dataset_name": "cnndm_v3_0_0",
+    "dataset_query": [ "downloaded", [ "^^", "substitute", "dataset_name=#{dataset_name}#" ]],
+    "dataset_entry": [ "^", "byquery", [[ "^^", "get", "dataset_query" ]], {}, ["dataset_query"] ],
+    "dataset_path": [ "^^", "execute", [[
+        [ "get", "dataset_entry" ],
+        [ "get_path" ]
+    ]] ],
+
+    "sax_admin_server_storage_bucket": "sax_admin_server_storage_bucket",
+    "extra_env": [ "^^", "substitute", [ {
+        "SAX_ADMIN_SERVER_STORAGE_BUCKET":  "#{sax_admin_server_storage_bucket}#",
+        "SAX_ROOT": "gs://#{sax_admin_server_storage_bucket}#/sax-root"
+    } ] ],
+
+    "script_extra_params": [ "^^", "substitute",
+        "--mlperf_conf_path=\"#{loadgen_mlperf_conf_path}#\" --user_conf_override_path=\"#{loadgen_user_conf_path}#\" --scenario=#{loadgen_scenario}# --model_path=\"#{model_path}#\" --dataset_path=\"#{dataset_path}#\" --max_examples=#{loadgen_dataset_size}# --log_interval=#{log_interval}# --log_path=\"#{output_dir}#\" --nostore_sax_accuracy --noextra_log_dir --tokenizer_path=#{tokenizer_path}# #{accuracy_flag}# ; echo #{input_parameters_file_path}#"
+    ],
+
+    "submission_files_to_copy_from_code": [ "README.md", "README.setup.md" ]
+}

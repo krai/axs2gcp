@@ -1,0 +1,11 @@
+{
+    "_parent_entries": [ [ "^", "core_collection" ], [ "^", "byname", "git" ] ],
+    "tags": [
+        "git_repo",
+        "collection"
+    ],
+    "repo_name": "axs2gcp",
+    "contained_entries": {
+        "tpu_collection": "tpu_collection"
+    }
+}

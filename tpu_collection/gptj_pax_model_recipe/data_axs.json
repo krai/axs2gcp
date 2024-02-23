@@ -1,0 +1,45 @@
+{
+    "_producer_rules": [
+        [ [ "pax_model", "task=gptj" ], [["get", "pipeline"]] ]
+    ],
+
+    "_parent_entries": [ [ "^", "byname", "python_script" ], [ "^", "byname", "entry_creator" ] ],
+
+    "task": "gptj",
+
+    "pipeline": [ "^^", "execute", [[
+        [ "run" ],
+        [],
+        [ "get", "stored_newborn_entry" ]
+    ]] ],
+
+    "newborn_entry_tags": [ "pax_model" ],
+    "newborn_name_template": "gptj_pax_model",
+    "newborn_entry_param_names": [ "task" ],
+
+    "path_to_requirements": [ "^^", "get_path", "requirements.txt" ],
+
+    "python_deps": [
+        [ "^^", "python_sync_pip_package", [[ "python_package", "package_name=pax_converter_python_deps", [ "^^", "substitute", "installable=-r #{path_to_requirements}#" ] ]] ]
+    ],
+
+    "saxml_git_entry": [ "^", "byquery", "git_repo,repo_name=saxml_git,checkout=main" ],
+
+    "abs_script_path": [ "^^", "execute", [[
+        [ "get", "saxml_git_entry" ],
+        [ "get_path_of", "pax_conversion_script" ]
+    ]] ],
+
+    "checkpoint_path": [ "^", "execute", [[
+        [ "byquery", "extracted,pytorch_model,model_name=gptj_cnndm" ],
+        [ "get_path" ]
+    ]] ],
+
+    "extra_env": {
+        "PJRT_DEVICE": "CPU",
+        "JAX_PLATFORMS": ""
+    },
+
+    "chkp_dir": [ "^^", "substitute", "#{newborn_entry_path}#/checkpoint_00000000" ],
+    "script_extra_params": [ "^^", "substitute", "--base-model-path #{checkpoint_path}# --pax-model-path #{newborn_entry_path}# ; touch #{chkp_dir}#/commit_success.txt #{chkp_dir}#/state/commit_success.txt #{chkp_dir}#/metadata/commit_success.txt" ]
+}

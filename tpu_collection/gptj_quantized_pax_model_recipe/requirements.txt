@@ -1,0 +1,6 @@
+apache-beam
+git+https://github.com/google/paxml
+git+https://github.com/google/praxis
+protobuf
+tensorflow
+lingvo

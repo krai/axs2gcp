@@ -1,0 +1,18 @@
+{
+    "_producer_rules": [
+        [ [ "git_repo", "repo_name=saxml_git", "checkout?=mlperf4.0" ], [["get_kernel"],["byname","git"],["clone"]], {
+            "COMMENT": "variation used by Admin and Model Servers, and for compiling sax.so",
+            "url": "https://github.com/tpu-inference/saxml"
+        }, [ "contained_files" ] ],
+
+        [ [ "git_repo", "repo_name=saxml_git", "checkout?=main" ], [["get_kernel"],["byname","git"],["clone"]], {
+            "COMMENT": "variation used for converting model to pax and for its further quantization",
+            "url": "https://github.com/google/saxml"
+        }, [ "contained_files" ] ]
+    ],
+
+    "contained_files": {
+        "pax_conversion_script": [ "saxml", "tools", "convert_gptj_ckpt.py" ],
+        "model_quantization_script": [ "saxml", "tools", "offline_quantize.py" ]
+    }
+}

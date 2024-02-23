@@ -1,0 +1,30 @@
+{
+    "_producer_rules": [
+        [ [ "lib", "lib_name=sax_so" ], [["get", "pipeline"]] ]
+    ],
+
+    "_parent_entries": [ [ "^", "byname", "shell" ], [ "^", "byname", "entry_creator" ] ],
+
+    "pipeline": [ "^^", "execute", [[
+        [ "run" ],
+        [],
+        [ "get", "stored_newborn_entry" ]
+    ]] ],
+
+    "lib_name": "sax_so",
+    "contained_files": {
+        "sax_so": [ "AS^IS", "AS^IS", "^^", "find_file", "sax.so" ]
+    },
+
+    "newborn_entry_tags": [ "lib" ],
+    "newborn_name_template": "sax_so",
+    "newborn_entry_param_names": [ "lib_name", "contained_files" ],
+
+    "in_dir": [ "^^", "execute", [[
+        [ "get_kernel" ],
+        [ "byquery", "git_repo,repo_name=saxml_git,checkout=mlperf4.0" ],
+        [ "get_path" ]
+    ]] ],
+
+    "shell_cmd_with_subs": "bazel --output_user_root=#{newborn_entry_path}# build saxml/client/python/sax.cc --compile_one_dependency"
+}

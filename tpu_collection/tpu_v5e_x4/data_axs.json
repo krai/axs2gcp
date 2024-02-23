@@ -1,0 +1,14 @@
+{
+    "_parent_entries": [ [ "^", "byname", "base_sut" ] ],
+
+    "tags": [ "sut_description" ],
+    "sut": "tpu_v5e_x4",
+
+    "data": [ "^^", "execute", [[
+        [ "get_path", "description.json" ],
+        0,
+        [ "func", "ufun.load_json" ]
+    ]] ],
+
+    "system_type": "datacenter"
+}

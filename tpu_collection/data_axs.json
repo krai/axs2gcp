@@ -1,0 +1,14 @@
+{
+    "_parent_entries": [ [ "^", "core_collection" ] ],
+    "tags": [
+        "collection"
+    ],
+    "contained_entries": {
+        "saxml_git_recipe": "saxml_git_recipe",
+        "gptj_pax_model_recipe": "gptj_pax_model_recipe",
+        "gptj_quantized_pax_model_recipe": "gptj_quantized_pax_model_recipe",
+        "sax_so_recipe": "sax_so_recipe",
+        "gptj_using_saxml_loadgen": "gptj_using_saxml_loadgen",
+        "tpu_v5e_x4": "tpu_v5e_x4"
+    }
+}
