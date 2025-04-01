@@ -1,0 +1,15 @@
+{
+    "_parent_entries": [
+        [
+            "^",
+            "core_collection"
+        ]
+    ],
+    "tags": [
+        "collection"
+    ],
+    "contained_entries": {
+        "llama3_1_using_vllm_loadgen": "llama3_1_using_vllm_loadgen"
+    },
+    "__completed": "2025.04.01_21h28m31s"
+}

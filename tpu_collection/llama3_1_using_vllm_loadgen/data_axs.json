@@ -1,0 +1,173 @@
+{
+    "_parent_entries": [ [ "^", "byname", "python_script" ], [ "^", "byname", "base_loadgen_program" ] ],
+    "_producer_rules": [
+        [ [ "loadgen_output", "task=llama3_1", "framework=vllm" ], [["get", "pipeline"]] ]
+    ],
+
+    "framework": "vllm",
+    "verbosity": 0,
+    "batch_size": 1,
+
+    "top_k":        1,
+    "temperature":  0.0,
+    "detokenize":   false,
+    "quantized":    false,
+    "max_tokens": 1024,
+    "min_tokens": 1,
+    "repetition_penalty": 1,
+    "frequency_penalty": 0,
+    "ignore_eos": false,
+    "early_stopping": false,
+    "use_beam_search": false,
+    "skip_special_tokens": false,
+
+    "backend": "default",
+
+    "desired_python_version": "3.10",
+
+    "vllm_deps_query": [ "^^", "case", [ [ "^^", "get", "backend" ],
+        "default", [ "python_package", "package_name=torch" ],
+        "cpu", [ "python_package", "contains_deps", "package_name=vllm_python_deps" ],
+	"rocm", []
+    ] ],
+    "vllm_query": [ "python_package", "package_name=vllm", [ "package_backend", [ "^^", "get", "backend" ] ], [ "desired_python_version", [ "^^", "get", "desired_python_version" ] ] ],
+    "loadgen_query": [ "python_package", "package_name=mlperf_loadgen" ],
+    "typing_extensions_query":  [ "python_package", "package_name=typing_extensions" ],
+    "huggingface_hub_query": [ "python_package", "package_name=huggingface_hub" ],
+
+    "_BEFORE_CODE_LOADING": [ "^^", "execute", [[
+        ["get_kernel"],
+        ["byquery", [[ "^^", "get", "typing_extensions_query" ]] ],
+        ["use"],
+        []
+	]]],
+
+    "python_deps": [ "^^", "case", [ [ "^^", "get", "backend" ],
+        "default", [[ "get", "python_deps_default" ]],
+        "cpu", [[ "get", "python_deps_default" ]],
+        "rocm", [[ "get", "python_deps_rocm" ]],
+        "tpu", [[ "get", "python_deps_tpu" ]]
+    	], { "execute_value": true } 
+    ],
+
+    "python_deps_default": [
+        [ "^^", "python_sync_pip_package", [ [ "^^", "get", "vllm_deps_query" ] ] ],
+        [ "^^", "python_sync_pip_package", [ [ "^^", "get", "vllm_query" ] ] ],
+        [ "^^", "python_sync_pip_package", [ [ "^^", "get", "loadgen_query" ] ] ] 
+    ],
+
+    "python_deps_tpu": [],
+
+    "python_deps_rocm": [
+        [ "^^", "python_sync_pip_package", [ [ "^^", "get", "loadgen_query" ] ] ]
+    ],
+
+    "model_name": [ "^^", "get", "task" ], 
+    "model_variant": "8b",
+    "mlperf_model_name": [ "^^", "substitute", "#{model_name}#-#{model_variant}#" ],
+    "hf_model_name": [ "^^", "substitute", "meta-llama/llama-3.1-#{model_variant}#-Instruct" ],
+    "dtype": "float16",
+    "enforce_eager": false,
+    "gpu_memory_utilization": 0.95,
+    "device": "cuda:0",
+    "max_model_len": 2048,
+    "max_seq_len_to_capture": 2048,
+    "disable_custom_all_reduce": true,
+    "max_num_batched_tokens": 1024,
+    "max_num_seqs": 128,
+    "swap_space": 0.0,
+    "enable_lora": false,
+    "max_loras": 0,
+    "lora_paths": [],
+    "max_lora_rank": 8,
+    "tensor_parallel_size": 4,
+
+    "hostname": "tpu",
+    "model_path_on_tpu": "/mnt/ssd2/downloaded_Llama-3.1-70b-Instruct_model/",
+    "download_dir": "/mnt/ssd2/data",
+    "model_entry": [ "^", "byquery", [ "^^", "substitute", "downloaded,hf_model,model_family=llama3_1,variant=#{model_variant}#" ], {}, [ "model_variant" ] ],
+    "model_path": [ "^^", "case", [ [ "^^", "get", "hostname" ],
+        "chai", [[ "get", "model_path_on_chai" ]],
+        "xe9680-1", [[ "get", "model_path_on_xe9680-1" ]],
+        "Waco-RR57521", [[ "get", "model_path_on_xe9680-3" ]],
+        "tpu", [[ "get", "model_path_on_tpu" ]]
+    ], { "default_value": [
+        [ "get", "model_entry" ],
+        [ "get_path" ]
+    ], "execute_value": true } ],
+
+    "total_samples": 24576,
+    "dataset_name": "openorca",
+    "dataset_query": [ "^^", "substitute", "converted,dataset_name=#{dataset_name}#,model_family=llama3_1,total_samples=#{total_samples}#" ],
+    "dataset_entry": [ "^", "byquery", [[ "^^", "get", "dataset_query" ]], {}, ["dataset_query"] ],
+    "dataset_path": [ "^^", "execute", [[
+        [ "get", "dataset_entry" ],
+        [ "get_path", "open_orca_gpt4_tokenized_llama.sampled_#{total_samples}#.pkl" ]
+    ]] ],
+
+    "output_entry_parents": [ "AS^IS", "AS^IS", [ "^", "byname", "base_llama3_1_loadgen_experiment" ] ],
+
+    "retrained": "UNSET",
+    "input_data_types": "UNSET",
+    "weight_data_types": "UNSET",
+    "weight_transformations": "UNSET",
+    "url": "UNSET",
+
+    "output_entry_param_names": [
+        "task",
+        "framework",
+        "verbosity",
+        "batch_size",
+        "backend",
+
+        "mlperf_model_name",
+        "model_name",
+        "model_variant",
+        "hf_model_name",
+        "model_path",
+        "download_dir",
+        "dtype",
+        "enforce_eager",
+        "gpu_memory_utilization",
+        "device",
+        "max_model_len",
+        "max_seq_len_to_capture",
+        "disable_custom_all_reduce",
+        "max_num_batched_tokens",
+        "max_num_seqs",
+        "swap_space",
+        "enable_lora",
+        "max_loras",
+        "lora_paths",
+        "max_lora_rank",
+        "tensor_parallel_size",
+
+        "dataset_path",
+
+        "top_k",
+        "temperature",
+        "detokenize",
+        "max_tokens",
+        "min_tokens",
+        "repetition_penalty",
+        "frequency_penalty",
+        "ignore_eos",
+        "early_stopping",
+        "use_beam_search",
+        "skip_special_tokens",
+
+        "retrained",
+        "input_data_types",
+        "weight_data_types",
+        "weight_transformations",
+        "url"
+    ],
+
+    "env": [ "^^", "ext_use_python_deps" ],
+    "extra_env": {
+        "VLLM_USE_V1": "1"
+    },
+
+    "rel_script_path": "llama3_1_openorca_vllm_loadgen.py",
+    "script_extra_params": [ "^^", "get", "input_parameters_file_path" ]
+}
