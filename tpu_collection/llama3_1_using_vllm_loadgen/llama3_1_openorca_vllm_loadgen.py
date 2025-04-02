@@ -6,6 +6,7 @@ import os
 import sys
 import threading
 import time
+from pathlib import Path
 
 import numpy as np
 from vllm import EngineArgs, LLMEngine, SamplingParams
@@ -96,7 +97,7 @@ engine_args_params = {"model": model_path, "served_model_name": hf_model_name, "
         "tensor_parallel_size": tensor_parallel_size}
 
 if device == "tpu":
-    os.environ["VLLM_XLA_CACHE_PATH"] = "/home/saheli/.cache/vllm/xla_cache"
+    os.environ["VLLM_XLA_CACHE_PATH"] = str(Path.home() / ".cache" / "vllm" / "xla_cache")
 
 engine_args     = EngineArgs(**engine_args_params)
 print(f"Creating LLM engine with parameters: {engine_args}")
